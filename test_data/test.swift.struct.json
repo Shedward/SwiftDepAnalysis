@@ -1,0 +1,148 @@
+{
+  "diagnostic_stage" : "source.diagnostic.stage.swift.parse",
+  "substructure" : [
+    {
+      "kind" : "decl.struct",
+      "name" : "TestStructA",
+      "substructure" : [
+        {
+          "kind" : "decl.var.instance",
+          "name" : "testStructAInt",
+          "typename" : "Int"
+        },
+        {
+          "kind" : "decl.var.instance",
+          "name" : "testStructAString",
+          "typename" : "String"
+        }
+      ]
+    },
+    {
+      "kind" : "decl.struct",
+      "name" : "TestStructB",
+      "substructure" : [
+        {
+          "kind" : "decl.var.instance",
+          "name" : "testStructBStructA",
+          "typename" : "TestStructA"
+        }
+      ]
+    },
+    {
+      "kind" : "decl.enum",
+      "name" : "TestEnum",
+      "substructure" : [
+        {
+          "kind" : "decl.enumcase",
+          "substructure" : [
+            {
+              "kind" : "decl.enumelement",
+              "name" : "some",
+            }
+          ]
+        },
+        {
+          "kind" : "decl.enumcase",
+          "substructure" : [
+            {
+              "kind" : "decl.enumelement",
+              "name" : "another(_:)",
+            }
+          ]
+        },
+        {
+          "kind" : "decl.var.parameter",
+          "typename" : "TestStructB"
+        },
+        {
+          "kind" : "decl.function.method.instance",
+          "name" : "enumFunc()",
+          "substructure" : [
+            {
+              "kind" : "decl.var.local",
+              "name" : "x",
+            },
+            {
+              "kind" : "expr.call",
+              "name" : "TestStructA",
+              "substructure" : [
+                {
+                  "kind" : "expr.argument",
+                  "name" : "testStructAInt",
+                },
+                {
+                  "kind" : "expr.argument",
+                  "name" : "testStructAString",
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind" : "decl.class",
+      "name" : "TestBaseClass",
+      "runtime_name" : "_TtC4main13TestBaseClass",
+      "substructure" : [
+        {
+          "kind" : "decl.function.method.instance",
+          "name" : "someFunc()",
+          "substructure" : [
+            {
+              "kind" : "decl.var.local",
+              "name" : "y",
+            },
+            {
+              "kind" : "expr.call",
+              "name" : "TestStructA",
+              "substructure" : [
+                {
+                  "kind" : "expr.argument",
+                  "name" : "testStructAInt",
+                },
+                {
+                  "kind" : "expr.argument",
+                  "name" : "testStructAString",
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elements" : [
+        {
+          "kind" : "structure.elem.typeref",
+        }
+      ],
+      "inheritedtypes" : [
+        {
+          "name" : "TestBaseClass"
+        }
+      ],
+      "kind" : "decl.class",
+      "name" : "TestClass",
+      "runtime_name" : "_TtC4main9TestClass",
+      "substructure" : [
+        {
+          "accessibility" : "accessibility.internal",
+          "attributes" : [
+            {
+              "attribute" : "source.decl.attribute.override",
+            }
+          ],
+          "kind" : "decl.function.method.instance",
+          "name" : "someFunc()",
+          "substructure" : [
+            {
+              "kind" : "expr.call",
+              "name" : "super.someFunc",
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
