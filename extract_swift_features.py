@@ -54,13 +54,29 @@ class FeatureExtractor:
 		self._dependencies = []
 
 	def extract(filename):
-		pass
+		structure = self._structure(filename)
+		self._process(
+			ProcessingContext(declaration=None), 
+			structure["key.substructure"]
+		)
+
 
 	def index(self):
 		return self._index
 
 	def dependencies(self):
 		return self._dependencies
+
+	def _structure(self, filename):
+		pass
+
+	class ProcessingContext:
+		def __init__(declaration):
+			self.declaration = declaration
+
+	def _process(self, context, structure):
+		pass
+
 
 
 # -- Main --
