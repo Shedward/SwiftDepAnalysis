@@ -51,10 +51,10 @@ class SwiftObject:
 
 class SwiftDependency:
 	def __init__(self, object, dependency, type, path):
-		self.object = None 
-		self.dependency = None
-		self.type = None
-		self.path = None
+		self.object = object 
+		self.dependency = dependency
+		self.type = type
+		self.path = path
 
 class ProcessingContext:
 	def __init__(self, file, level, declaration):
@@ -122,8 +122,10 @@ class FeatureExtractor:
 			self._index.append(SwiftObject(name, type, context.file))
 			LOGGER.verbose("Found {} {}", type, name)
 
-		def track_dependency(dependency, type):
-			dependency = SwiftDependency(context.declaration, dependency, type, context.file)
+		def track_dependency(dependency, type, object=None):
+			if object is None:
+				object = context.declaration
+			dependency = SwiftDependency(object, dependency, type, context.file)
 			self._dependencies.append(dependency)
 			LOGGER.verbose("Found {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
 
@@ -141,8 +143,16 @@ class FeatureExtractor:
 			track_type("protocol")
 			declared_type_name = name
 
-		self._process_substructure(context, node, declared_type_name)
+		if "key.inheritedtypes" in node:
+			inheritedtypes = node["key.inheritedtypes"]
+			if not isinstance(inheritedtypes, list):
+				return
 
+			for inheritedtype in inheritedtypes:
+				if isinstance(inheritedtype, dict) and "key.name" in inheritedtype:
+					track_dependency(inheritedtype["key.name"], "inheritance", name)
+
+		self._process_substructure(context, node, declared_type_name)
 
 # -- Main --
 
