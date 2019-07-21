@@ -1,144 +1,755 @@
 {
-  "diagnostic_stage" : "source.diagnostic.stage.swift.parse",
-  "substructure" : [
+  "key.diagnostic_stage" : "source.diagnostic.stage.swift.parse",
+  "key.length" : 1358,
+  "key.offset" : 0,
+  "key.substructure" : [
     {
-      "kind" : "decl.struct",
-      "name" : "TestStructA",
-      "substructure" : [
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 58,
+      "key.bodyoffset" : 20,
+      "key.kind" : "source.lang.swift.decl.struct",
+      "key.length" : 79,
+      "key.name" : "TestStructA",
+      "key.namelength" : 11,
+      "key.nameoffset" : 7,
+      "key.offset" : 0,
+      "key.substructure" : [
         {
-          "kind" : "decl.var.instance",
-          "name" : "testStructAInt",
-          "typename" : "Int"
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.kind" : "source.lang.swift.decl.var.instance",
+          "key.length" : 23,
+          "key.name" : "testStructAInt",
+          "key.namelength" : 14,
+          "key.nameoffset" : 26,
+          "key.offset" : 22,
+          "key.typename" : "Int"
         },
         {
-          "kind" : "decl.var.instance",
-          "name" : "testStructAString",
-          "typename" : "String"
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.kind" : "source.lang.swift.decl.var.instance",
+          "key.length" : 29,
+          "key.name" : "testStructAString",
+          "key.namelength" : 17,
+          "key.nameoffset" : 52,
+          "key.offset" : 48,
+          "key.typename" : "String"
         }
       ]
     },
     {
-      "kind" : "decl.struct",
-      "name" : "TestStructB",
-      "substructure" : [
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 38,
+      "key.bodyoffset" : 101,
+      "key.kind" : "source.lang.swift.decl.struct",
+      "key.length" : 59,
+      "key.name" : "TestStructB",
+      "key.namelength" : 11,
+      "key.nameoffset" : 88,
+      "key.offset" : 81,
+      "key.substructure" : [
         {
-          "kind" : "decl.var.instance",
-          "name" : "testStructBStructA",
-          "typename" : "TestStructA"
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.kind" : "source.lang.swift.decl.var.instance",
+          "key.length" : 35,
+          "key.name" : "testStructBStructA",
+          "key.namelength" : 18,
+          "key.nameoffset" : 107,
+          "key.offset" : 103,
+          "key.typename" : "TestStructA"
         }
       ]
     },
     {
-      "kind" : "decl.enum",
-      "name" : "TestEnum",
-      "substructure" : [
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 79,
+      "key.bodyoffset" : 163,
+      "key.kind" : "source.lang.swift.decl.struct",
+      "key.length" : 101,
+      "key.name" : "StaticStruct",
+      "key.namelength" : 12,
+      "key.nameoffset" : 149,
+      "key.offset" : 142,
+      "key.substructure" : [
         {
-          "kind" : "decl.enumcase",
-          "substructure" : [
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.bodylength" : 26,
+          "key.bodyoffset" : 214,
+          "key.kind" : "source.lang.swift.decl.function.method.static",
+          "key.length" : 76,
+          "key.name" : "anotherStaticFunc()",
+          "key.namelength" : 19,
+          "key.nameoffset" : 177,
+          "key.offset" : 165,
+          "key.substructure" : [
             {
-              "kind" : "decl.enumelement",
-              "name" : "some",
-            }
-          ]
-        },
-        {
-          "kind" : "decl.enumcase",
-          "substructure" : [
-            {
-              "kind" : "decl.enumelement",
-              "name" : "another(_:)",
-            }
-          ]
-        },
-        {
-          "kind" : "decl.var.parameter",
-          "typename" : "TestStructB"
-        },
-        {
-          "kind" : "decl.function.method.instance",
-          "name" : "enumFunc()",
-          "substructure" : [
-            {
-              "kind" : "decl.var.local",
-              "name" : "x",
-            },
-            {
-              "kind" : "expr.call",
-              "name" : "TestStructA",
-              "substructure" : [
-                {
-                  "kind" : "expr.argument",
-                  "name" : "testStructAInt",
-                },
-                {
-                  "kind" : "expr.argument",
-                  "name" : "testStructAString",
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "kind" : "decl.class",
-      "name" : "TestBaseClass",
-      "runtime_name" : "_TtC4main13TestBaseClass",
-      "substructure" : [
-        {
-          "kind" : "decl.function.method.instance",
-          "name" : "someFunc()",
-          "substructure" : [
-            {
-              "kind" : "decl.var.local",
-              "name" : "y",
-            },
-            {
-              "kind" : "expr.call",
-              "name" : "TestStructA",
-              "substructure" : [
-                {
-                  "kind" : "expr.argument",
-                  "name" : "testStructAInt",
-                },
-                {
-                  "kind" : "expr.argument",
-                  "name" : "testStructAString",
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "elements" : [
-        {
-          "kind" : "structure.elem.typeref",
-        }
-      ],
-      "inheritedtypes" : [
-        {
-          "name" : "TestBaseClass"
-        }
-      ],
-      "kind" : "decl.class",
-      "name" : "TestClass",
-      "runtime_name" : "_TtC4main9TestClass",
-      "substructure" : [
-        {
-          "accessibility" : "accessibility.internal",
-          "attributes" : [
-            {
-              "attribute" : "source.decl.attribute.override",
+              "key.bodylength" : 0,
+              "key.bodyoffset" : 237,
+              "key.kind" : "source.lang.swift.expr.call",
+              "key.length" : 14,
+              "key.name" : "StaticStruct",
+              "key.namelength" : 12,
+              "key.nameoffset" : 224,
+              "key.offset" : 224
             }
           ],
-          "kind" : "decl.function.method.instance",
-          "name" : "someFunc()",
-          "substructure" : [
+          "key.typename" : "StaticStruct"
+        }
+      ]
+    },
+    {
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 1,
+      "key.bodyoffset" : 267,
+      "key.kind" : "source.lang.swift.decl.protocol",
+      "key.length" : 24,
+      "key.name" : "NumProtocol",
+      "key.namelength" : 11,
+      "key.nameoffset" : 254,
+      "key.offset" : 245,
+      "key.runtime_name" : "_TtP4main11NumProtocol_"
+    },
+    {
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 283,
+      "key.bodyoffset" : 286,
+      "key.kind" : "source.lang.swift.decl.enum",
+      "key.length" : 299,
+      "key.name" : "TestEnum",
+      "key.namelength" : 8,
+      "key.nameoffset" : 276,
+      "key.offset" : 271,
+      "key.substructure" : [
+        {
+          "key.kind" : "source.lang.swift.decl.enumcase",
+          "key.length" : 9,
+          "key.namelength" : 0,
+          "key.nameoffset" : 0,
+          "key.offset" : 288,
+          "key.substructure" : [
             {
-              "kind" : "expr.call",
-              "name" : "super.someFunc",
+              "key.accessibility" : "source.lang.swift.accessibility.internal",
+              "key.kind" : "source.lang.swift.decl.enumelement",
+              "key.length" : 4,
+              "key.name" : "some",
+              "key.namelength" : 4,
+              "key.nameoffset" : 293,
+              "key.offset" : 293
+            }
+          ]
+        },
+        {
+          "key.kind" : "source.lang.swift.decl.enumcase",
+          "key.length" : 25,
+          "key.namelength" : 0,
+          "key.nameoffset" : 0,
+          "key.offset" : 299,
+          "key.substructure" : [
+            {
+              "key.accessibility" : "source.lang.swift.accessibility.internal",
+              "key.kind" : "source.lang.swift.decl.enumelement",
+              "key.length" : 20,
+              "key.name" : "another(_:)",
+              "key.namelength" : 20,
+              "key.nameoffset" : 304,
+              "key.offset" : 304
+            }
+          ]
+        },
+        {
+          "key.kind" : "source.lang.swift.decl.var.parameter",
+          "key.length" : 11,
+          "key.namelength" : 0,
+          "key.nameoffset" : 0,
+          "key.offset" : 312,
+          "key.typename" : "TestStructB"
+        },
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.bodylength" : 65,
+          "key.bodyoffset" : 344,
+          "key.kind" : "source.lang.swift.decl.function.method.instance",
+          "key.length" : 83,
+          "key.name" : "enumFunc()",
+          "key.namelength" : 10,
+          "key.nameoffset" : 332,
+          "key.offset" : 327,
+          "key.substructure" : [
+            {
+              "key.kind" : "source.lang.swift.decl.var.local",
+              "key.length" : 60,
+              "key.name" : "x",
+              "key.namelength" : 1,
+              "key.nameoffset" : 351,
+              "key.offset" : 347
+            },
+            {
+              "key.bodylength" : 39,
+              "key.bodyoffset" : 367,
+              "key.kind" : "source.lang.swift.expr.call",
+              "key.length" : 52,
+              "key.name" : "TestStructA",
+              "key.namelength" : 11,
+              "key.nameoffset" : 355,
+              "key.offset" : 355,
+              "key.substructure" : [
+                {
+                  "key.bodylength" : 1,
+                  "key.bodyoffset" : 383,
+                  "key.kind" : "source.lang.swift.expr.argument",
+                  "key.length" : 17,
+                  "key.name" : "testStructAInt",
+                  "key.namelength" : 14,
+                  "key.nameoffset" : 367,
+                  "key.offset" : 367
+                },
+                {
+                  "key.bodylength" : 1,
+                  "key.bodyoffset" : 405,
+                  "key.kind" : "source.lang.swift.expr.argument",
+                  "key.length" : 20,
+                  "key.name" : "testStructAString",
+                  "key.namelength" : 17,
+                  "key.nameoffset" : 386,
+                  "key.offset" : 386
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.bodylength" : 3,
+          "key.bodyoffset" : 460,
+          "key.kind" : "source.lang.swift.decl.function.method.static",
+          "key.length" : 51,
+          "key.name" : "from(other:)",
+          "key.namelength" : 21,
+          "key.nameoffset" : 425,
+          "key.offset" : 413,
+          "key.substructure" : [
+            {
+              "key.kind" : "source.lang.swift.decl.var.parameter",
+              "key.length" : 15,
+              "key.name" : "other",
+              "key.namelength" : 5,
+              "key.nameoffset" : 430,
+              "key.offset" : 430,
+              "key.typename" : "TestEnum"
+            }
+          ],
+          "key.typename" : "TestEnum"
+        },
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.kind" : "source.lang.swift.decl.var.static",
+          "key.length" : 37,
+          "key.name" : "staticVar",
+          "key.namelength" : 9,
+          "key.nameoffset" : 478,
+          "key.offset" : 467
+        },
+        {
+          "key.bodylength" : 0,
+          "key.bodyoffset" : 503,
+          "key.kind" : "source.lang.swift.expr.call",
+          "key.length" : 14,
+          "key.name" : "StaticStruct",
+          "key.namelength" : 12,
+          "key.nameoffset" : 490,
+          "key.offset" : 490
+        },
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.kind" : "source.lang.swift.decl.var.static",
+          "key.length" : 62,
+          "key.name" : "anotherStaticVar",
+          "key.namelength" : 16,
+          "key.nameoffset" : 517,
+          "key.offset" : 506
+        },
+        {
+          "key.bodylength" : 0,
+          "key.bodyoffset" : 567,
+          "key.kind" : "source.lang.swift.expr.call",
+          "key.length" : 32,
+          "key.name" : "StaticStruct.anotherStaticFunc",
+          "key.namelength" : 30,
+          "key.nameoffset" : 536,
+          "key.offset" : 536
+        }
+      ]
+    },
+    {
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 678,
+      "key.bodyoffset" : 593,
+      "key.kind" : "source.lang.swift.decl.class",
+      "key.length" : 700,
+      "key.name" : "TestBaseClass",
+      "key.namelength" : 13,
+      "key.nameoffset" : 578,
+      "key.offset" : 572,
+      "key.runtime_name" : "_TtC4main13TestBaseClass",
+      "key.substructure" : [
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.bodylength" : 65,
+          "key.bodyoffset" : 612,
+          "key.kind" : "source.lang.swift.decl.function.method.instance",
+          "key.length" : 83,
+          "key.name" : "someFunc()",
+          "key.namelength" : 10,
+          "key.nameoffset" : 600,
+          "key.offset" : 595,
+          "key.substructure" : [
+            {
+              "key.kind" : "source.lang.swift.decl.var.local",
+              "key.length" : 60,
+              "key.name" : "y",
+              "key.namelength" : 1,
+              "key.nameoffset" : 619,
+              "key.offset" : 615
+            },
+            {
+              "key.bodylength" : 39,
+              "key.bodyoffset" : 635,
+              "key.kind" : "source.lang.swift.expr.call",
+              "key.length" : 52,
+              "key.name" : "TestStructA",
+              "key.namelength" : 11,
+              "key.nameoffset" : 623,
+              "key.offset" : 623,
+              "key.substructure" : [
+                {
+                  "key.bodylength" : 1,
+                  "key.bodyoffset" : 651,
+                  "key.kind" : "source.lang.swift.expr.argument",
+                  "key.length" : 17,
+                  "key.name" : "testStructAInt",
+                  "key.namelength" : 14,
+                  "key.nameoffset" : 635,
+                  "key.offset" : 635
+                },
+                {
+                  "key.bodylength" : 1,
+                  "key.bodyoffset" : 673,
+                  "key.kind" : "source.lang.swift.expr.argument",
+                  "key.length" : 20,
+                  "key.name" : "testStructAString",
+                  "key.namelength" : 17,
+                  "key.nameoffset" : 654,
+                  "key.offset" : 654
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.bodylength" : 557,
+          "key.bodyoffset" : 712,
+          "key.kind" : "source.lang.swift.decl.function.method.instance",
+          "key.length" : 589,
+          "key.name" : "someFunc(b:)",
+          "key.namelength" : 24,
+          "key.nameoffset" : 686,
+          "key.offset" : 681,
+          "key.substructure" : [
+            {
+              "key.kind" : "source.lang.swift.decl.var.parameter",
+              "key.length" : 14,
+              "key.name" : "b",
+              "key.namelength" : 1,
+              "key.nameoffset" : 695,
+              "key.offset" : 695,
+              "key.typename" : "TestStructB"
+            },
+            {
+              "key.accessibility" : "source.lang.swift.accessibility.private",
+              "key.bodylength" : 27,
+              "key.bodyoffset" : 734,
+              "key.kind" : "source.lang.swift.decl.struct",
+              "key.length" : 47,
+              "key.name" : "SomeResult",
+              "key.namelength" : 10,
+              "key.nameoffset" : 722,
+              "key.offset" : 715,
+              "key.substructure" : [
+                {
+                  "key.accessibility" : "source.lang.swift.accessibility.internal",
+                  "key.kind" : "source.lang.swift.decl.var.instance",
+                  "key.length" : 20,
+                  "key.name" : "someValue",
+                  "key.namelength" : 9,
+                  "key.nameoffset" : 742,
+                  "key.offset" : 738,
+                  "key.typename" : "XType"
+                }
+              ]
+            },
+            {
+              "key.elements" : [
+                {
+                  "key.kind" : "source.lang.swift.structure.elem.condition_expr",
+                  "key.length" : 39,
+                  "key.offset" : 768
+                }
+              ],
+              "key.kind" : "source.lang.swift.stmt.if",
+              "key.length" : 502,
+              "key.namelength" : 0,
+              "key.nameoffset" : 0,
+              "key.offset" : 765,
+              "key.substructure" : [
+                {
+                  "key.bodylength" : 457,
+                  "key.bodyoffset" : 809,
+                  "key.kind" : "source.lang.swift.stmt.brace",
+                  "key.length" : 459,
+                  "key.namelength" : 0,
+                  "key.nameoffset" : 0,
+                  "key.offset" : 808,
+                  "key.substructure" : [
+                    {
+                      "key.elements" : [
+                        {
+                          "key.kind" : "source.lang.swift.structure.elem.id",
+                          "key.length" : 1,
+                          "key.offset" : 817
+                        },
+                        {
+                          "key.kind" : "source.lang.swift.structure.elem.expr",
+                          "key.length" : 5,
+                          "key.offset" : 822
+                        }
+                      ],
+                      "key.kind" : "source.lang.swift.stmt.foreach",
+                      "key.length" : 450,
+                      "key.namelength" : 0,
+                      "key.nameoffset" : 0,
+                      "key.offset" : 813,
+                      "key.substructure" : [
+                        {
+                          "key.kind" : "source.lang.swift.decl.var.local",
+                          "key.length" : 1,
+                          "key.name" : "i",
+                          "key.namelength" : 1,
+                          "key.nameoffset" : 817,
+                          "key.offset" : 817
+                        },
+                        {
+                          "key.bodylength" : 433,
+                          "key.bodyoffset" : 829,
+                          "key.kind" : "source.lang.swift.stmt.brace",
+                          "key.length" : 435,
+                          "key.namelength" : 0,
+                          "key.nameoffset" : 0,
+                          "key.offset" : 828,
+                          "key.substructure" : [
+                            {
+                              "key.bodylength" : 1,
+                              "key.bodyoffset" : 840,
+                              "key.kind" : "source.lang.swift.expr.call",
+                              "key.length" : 8,
+                              "key.name" : "print",
+                              "key.namelength" : 5,
+                              "key.nameoffset" : 834,
+                              "key.offset" : 834
+                            },
+                            {
+                              "key.elements" : [
+                                {
+                                  "key.kind" : "source.lang.swift.structure.elem.expr",
+                                  "key.length" : 1,
+                                  "key.offset" : 854
+                                }
+                              ],
+                              "key.kind" : "source.lang.swift.stmt.switch",
+                              "key.length" : 411,
+                              "key.namelength" : 0,
+                              "key.nameoffset" : 0,
+                              "key.offset" : 847,
+                              "key.substructure" : [
+                                {
+                                  "key.elements" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.structure.elem.pattern",
+                                      "key.length" : 1,
+                                      "key.offset" : 868
+                                    }
+                                  ],
+                                  "key.kind" : "source.lang.swift.stmt.case",
+                                  "key.length" : 22,
+                                  "key.namelength" : 0,
+                                  "key.nameoffset" : 0,
+                                  "key.offset" : 863,
+                                  "key.substructure" : [
+                                    {
+                                      "key.bodylength" : 1,
+                                      "key.bodyoffset" : 883,
+                                      "key.kind" : "source.lang.swift.expr.call",
+                                      "key.length" : 8,
+                                      "key.name" : "print",
+                                      "key.namelength" : 5,
+                                      "key.nameoffset" : 877,
+                                      "key.offset" : 877
+                                    }
+                                  ]
+                                },
+                                {
+                                  "key.elements" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.structure.elem.pattern",
+                                      "key.length" : 1,
+                                      "key.offset" : 896
+                                    }
+                                  ],
+                                  "key.kind" : "source.lang.swift.stmt.case",
+                                  "key.length" : 241,
+                                  "key.namelength" : 0,
+                                  "key.nameoffset" : 0,
+                                  "key.offset" : 891,
+                                  "key.substructure" : [
+                                    {
+                                      "key.bodylength" : 1,
+                                      "key.bodyoffset" : 911,
+                                      "key.kind" : "source.lang.swift.expr.call",
+                                      "key.length" : 8,
+                                      "key.name" : "print",
+                                      "key.namelength" : 5,
+                                      "key.nameoffset" : 905,
+                                      "key.offset" : 905
+                                    },
+                                    {
+                                      "key.accessibility" : "source.lang.swift.accessibility.private",
+                                      "key.bodylength" : 194,
+                                      "key.bodyoffset" : 937,
+                                      "key.kind" : "source.lang.swift.decl.enum",
+                                      "key.length" : 212,
+                                      "key.name" : "SwitchEnum",
+                                      "key.namelength" : 10,
+                                      "key.nameoffset" : 925,
+                                      "key.offset" : 920,
+                                      "key.substructure" : [
+                                        {
+                                          "key.accessibility" : "source.lang.swift.accessibility.internal",
+                                          "key.bodylength" : 43,
+                                          "key.bodyoffset" : 970,
+                                          "key.kind" : "source.lang.swift.decl.protocol",
+                                          "key.length" : 69,
+                                          "key.name" : "HiddenProtocol",
+                                          "key.namelength" : 14,
+                                          "key.nameoffset" : 954,
+                                          "key.offset" : 945,
+                                          "key.substructure" : [
+                                            {
+                                              "key.accessibility" : "source.lang.swift.accessibility.internal",
+                                              "key.bodylength" : 9,
+                                              "key.bodyoffset" : 995,
+                                              "key.kind" : "source.lang.swift.decl.var.instance",
+                                              "key.length" : 26,
+                                              "key.name" : "value",
+                                              "key.namelength" : 5,
+                                              "key.nameoffset" : 983,
+                                              "key.offset" : 979,
+                                              "key.setter_accessibility" : "source.lang.swift.accessibility.internal",
+                                              "key.typename" : "Int"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "key.accessibility" : "source.lang.swift.accessibility.internal",
+                                          "key.bodylength" : 55,
+                                          "key.bodyoffset" : 1068,
+                                          "key.elements" : [
+                                            {
+                                              "key.kind" : "source.lang.swift.structure.elem.typeref",
+                                              "key.length" : 14,
+                                              "key.offset" : 1052
+                                            }
+                                          ],
+                                          "key.inheritedtypes" : [
+                                            {
+                                              "key.name" : "HiddenProtocol"
+                                            }
+                                          ],
+                                          "key.kind" : "source.lang.swift.decl.protocol",
+                                          "key.length" : 102,
+                                          "key.name" : "ChildHiddenProtocol",
+                                          "key.namelength" : 19,
+                                          "key.nameoffset" : 1031,
+                                          "key.offset" : 1022,
+                                          "key.substructure" : [
+                                            {
+                                              "key.accessibility" : "source.lang.swift.accessibility.internal",
+                                              "key.bodylength" : 9,
+                                              "key.bodyoffset" : 1105,
+                                              "key.kind" : "source.lang.swift.decl.var.instance",
+                                              "key.length" : 38,
+                                              "key.name" : "childValue",
+                                              "key.namelength" : 10,
+                                              "key.nameoffset" : 1081,
+                                              "key.offset" : 1077,
+                                              "key.setter_accessibility" : "source.lang.swift.accessibility.internal",
+                                              "key.typename" : "SomeResult"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "key.elements" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.structure.elem.pattern",
+                                      "key.length" : 1,
+                                      "key.offset" : 1143
+                                    }
+                                  ],
+                                  "key.kind" : "source.lang.swift.stmt.case",
+                                  "key.length" : 27,
+                                  "key.namelength" : 0,
+                                  "key.nameoffset" : 0,
+                                  "key.offset" : 1138,
+                                  "key.substructure" : [
+                                    {
+                                      "key.bodylength" : 6,
+                                      "key.bodyoffset" : 1158,
+                                      "key.kind" : "source.lang.swift.expr.call",
+                                      "key.length" : 13,
+                                      "key.name" : "print",
+                                      "key.namelength" : 5,
+                                      "key.nameoffset" : 1152,
+                                      "key.offset" : 1152
+                                    }
+                                  ]
+                                },
+                                {
+                                  "key.elements" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.structure.elem.pattern",
+                                      "key.length" : 20,
+                                      "key.offset" : 1176
+                                    }
+                                  ],
+                                  "key.kind" : "source.lang.swift.stmt.case",
+                                  "key.length" : 46,
+                                  "key.namelength" : 0,
+                                  "key.nameoffset" : 0,
+                                  "key.offset" : 1171,
+                                  "key.substructure" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.decl.var.local",
+                                      "key.length" : 1,
+                                      "key.name" : "j",
+                                      "key.namelength" : 1,
+                                      "key.nameoffset" : 1180,
+                                      "key.offset" : 1180
+                                    },
+                                    {
+                                      "key.bodylength" : 6,
+                                      "key.bodyoffset" : 1210,
+                                      "key.kind" : "source.lang.swift.expr.call",
+                                      "key.length" : 13,
+                                      "key.name" : "print",
+                                      "key.namelength" : 5,
+                                      "key.nameoffset" : 1204,
+                                      "key.offset" : 1204
+                                    }
+                                  ]
+                                },
+                                {
+                                  "key.elements" : [
+                                    {
+                                      "key.kind" : "source.lang.swift.structure.elem.pattern",
+                                      "key.length" : 7,
+                                      "key.offset" : 1223
+                                    }
+                                  ],
+                                  "key.kind" : "source.lang.swift.stmt.case",
+                                  "key.length" : 29,
+                                  "key.namelength" : 0,
+                                  "key.nameoffset" : 0,
+                                  "key.offset" : 1223,
+                                  "key.substructure" : [
+                                    {
+                                      "key.bodylength" : 7,
+                                      "key.bodyoffset" : 1244,
+                                      "key.kind" : "source.lang.swift.expr.call",
+                                      "key.length" : 14,
+                                      "key.name" : "print",
+                                      "key.namelength" : 5,
+                                      "key.nameoffset" : 1238,
+                                      "key.offset" : 1238
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key.accessibility" : "source.lang.swift.accessibility.internal",
+      "key.bodylength" : 51,
+      "key.bodyoffset" : 1306,
+      "key.elements" : [
+        {
+          "key.kind" : "source.lang.swift.structure.elem.typeref",
+          "key.length" : 13,
+          "key.offset" : 1291
+        }
+      ],
+      "key.inheritedtypes" : [
+        {
+          "key.name" : "TestBaseClass"
+        }
+      ],
+      "key.kind" : "source.lang.swift.decl.class",
+      "key.length" : 84,
+      "key.name" : "TestClass",
+      "key.namelength" : 9,
+      "key.nameoffset" : 1280,
+      "key.offset" : 1274,
+      "key.runtime_name" : "_TtC4main9TestClass",
+      "key.substructure" : [
+        {
+          "key.accessibility" : "source.lang.swift.accessibility.internal",
+          "key.attributes" : [
+            {
+              "key.attribute" : "source.decl.attribute.override",
+              "key.length" : 8,
+              "key.offset" : 1308
+            }
+          ],
+          "key.bodylength" : 21,
+          "key.bodyoffset" : 1334,
+          "key.kind" : "source.lang.swift.decl.function.method.instance",
+          "key.length" : 39,
+          "key.name" : "someFunc()",
+          "key.namelength" : 10,
+          "key.nameoffset" : 1322,
+          "key.offset" : 1317,
+          "key.substructure" : [
+            {
+              "key.bodylength" : 0,
+              "key.bodyoffset" : 1352,
+              "key.kind" : "source.lang.swift.expr.call",
+              "key.length" : 16,
+              "key.name" : "super.someFunc",
+              "key.namelength" : 14,
+              "key.nameoffset" : 1337,
+              "key.offset" : 1337
             }
           ]
         }

@@ -7,6 +7,15 @@ struct TestStructB {
 	let testStructBStructA: TestStructA
 }
 
+struct StaticStruct {
+	static func anotherStaticFunc() -> StaticStruct {
+		return StaticStruct()
+	}
+}
+
+protocol NumProtocol {
+}
+
 enum TestEnum {
 	case some
 	case another(TestStructB)
@@ -18,6 +27,9 @@ enum TestEnum {
 	static func from(other: TestEnum) -> TestEnum {
 
 	}
+
+	static let staticVar = StaticStruct()
+	static let anotherStaticVar = StaticStruct.anotherStaticFunc()
 }
 
 class TestBaseClass {
@@ -27,7 +39,7 @@ class TestBaseClass {
 
 	func someFunc(b: TestStructB) {
 		struct SomeResult {
-			let someValue: x
+			let someValue: XType
 		}
 		if b.testStructBStructA.testStructAInt > 2 {
 			for i in 0...5 {
@@ -47,6 +59,8 @@ class TestBaseClass {
 						}
 					case 2:
 						print("Some")
+					case let j as NumProtocol:
+						print("Num!")
 					default:
 						print("Wrong")
 				}

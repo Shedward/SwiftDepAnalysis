@@ -62,6 +62,12 @@ class ProcessingContext:
 		self.level = level
 		self.declaration = declaration
 
+	def resolve_fullname(self, name):
+		if self.declaration is None:
+			return name
+		else:
+			return self.declaration + '.' + name
+
 class FeatureExtractor:
 	def __init__(self):
 		self._index = []
@@ -102,6 +108,8 @@ class FeatureExtractor:
 
 		if new_declaration is None:
 			new_declaration = context.declaration
+		else:
+			new_declaration = context.resolve_fullname(new_declaration)
 
 		self._procees_structure( 
 			ProcessingContext(
@@ -115,19 +123,25 @@ class FeatureExtractor:
 	def _process_node(self, context, node):
 		kind = node.get("key.kind")
 		name = node.get("key.name")
+		typename = node.get("key.typename")
 
 		LOGGER.debug("Process node {} {}", name, kind)
 
 		def track_type(type):
-			self._index.append(SwiftObject(name, type, context.file))
-			LOGGER.verbose("Found {} {}", type, name)
+			swift_object = SwiftObject(context.resolve_fullname(name), type, context.file)
+			self._index.append(swift_object)
+			LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
 
 		def track_dependency(dependency, type, object=None):
+			if dependency is None:
+				return 
 			if object is None:
 				object = context.declaration
+			if dependency == object:
+				return
 			dependency = SwiftDependency(object, dependency, type, context.file)
 			self._dependencies.append(dependency)
-			LOGGER.verbose("Found {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
+			LOGGER.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
 
 		declared_type_name = None
 		if (kind == "source.lang.swift.decl.struct"):
@@ -142,6 +156,12 @@ class FeatureExtractor:
 		elif (kind == "source.lang.swift.decl.protocol"):
 			track_type("protocol")
 			declared_type_name = name
+		elif (kind == "source.lang.swift.decl.var.parameter"):
+			track_dependency(typename, "func_parameter")
+		elif (kind == "source.lang.swift.decl.var.instance"):
+			track_dependency(typename, "property")
+		elif (kind == "source.lang.swift.decl.var.static"):
+			track_dependency(typename, "static_property")
 
 		if "key.inheritedtypes" in node:
 			inheritedtypes = node["key.inheritedtypes"]
@@ -165,4 +185,4 @@ def extract_features(log_level, path):
 	feature_extractor.extract(path)
 
 if __name__ == "__main__":
-	extract_features(log_level=Logger.LogLevel.DEBUG, path="test_data/test.swift")
+	extract_features(log_level=Logger.LogLevel.VERBOSE, path="test_data/test.swift")
