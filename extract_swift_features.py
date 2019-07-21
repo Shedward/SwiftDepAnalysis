@@ -6,6 +6,7 @@ import shutil
 import json
 from itertools import takewhile
 from enum import Enum
+from pathlib import Path
 
 # -- Utilities --
 
@@ -75,6 +76,9 @@ class FeatureExtractor:
 		self._dependencies = []
 
 	def extract(self, filename):
+		self.declarations_count = 0
+		self.dependencies_count = 0
+		LOGGER.verbose("Started {}", filename)
 		structure_bytes = self._structure(filename)
 		structure_string = structure_bytes.decode("utf8")
 		structure_json = json.loads(structure_string)
@@ -82,6 +86,7 @@ class FeatureExtractor:
 			ProcessingContext(filename, 0, None), 
 			structure_json
 		)
+		LOGGER.message("{}: {} defs/{} deps", filename, self.declarations_count, self.dependencies_count)
 
 
 	def index(self):
@@ -137,6 +142,7 @@ class FeatureExtractor:
 			swift_object = SwiftObject(context.resolve_fullname(name), type, context.file)
 			self._index.append(swift_object)
 			LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
+			self.declarations_count += 1
 
 		def track_dependency(dependency, type, object=None):
 			if object is None:
@@ -146,30 +152,31 @@ class FeatureExtractor:
 			dependency = SwiftDependency(object, dependency, type, context.file)
 			self._dependencies.append(dependency)
 			LOGGER.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
+			self.dependencies_count += 1
 
 		declared_type_name = None
-		if (kind == "source.lang.swift.decl.struct"):
+		if kind == "source.lang.swift.decl.struct":
 			track_type("struct")
 			track_dependency(context.resolve_fullname(name), "nested")
 			declared_type_name = name
-		elif (kind == "source.lang.swift.decl.class"):
+		elif kind == "source.lang.swift.decl.class":
 			track_type("class")
 			track_dependency(context.resolve_fullname(name), "nested")
 			declared_type_name = name
-		elif (kind == "source.lang.swift.decl.enum"):
+		elif kind == "source.lang.swift.decl.enum":
 			track_dependency(context.resolve_fullname(name), "nested")
 			track_type("enum")
 			declared_type_name = name
-		elif (kind == "source.lang.swift.decl.protocol"):
+		elif kind == "source.lang.swift.decl.protocol":
 			track_type("protocol")
 			declared_type_name = name
-		elif (kind == "source.lang.swift.decl.var.parameter"):
+		elif kind == "source.lang.swift.decl.var.parameter":
 			track_dependency(typename, "func_parameter")
-		elif (kind == "source.lang.swift.decl.var.instance"):
+		elif kind == "source.lang.swift.decl.var.instance":
 			track_dependency(typename, "property")
-		elif (kind == "source.lang.swift.decl.var.static"):
+		elif kind == "source.lang.swift.decl.var.static":
 			track_dependency(typename, "static_property")
-		elif (kind == "source.lang.swift.expr.call"):
+		elif kind == "source.lang.swift.expr.call":
 			called_type = self._extract_longest_type_name(name)
 			if len(called_type) > 0:
 				if called_type == name:
@@ -196,7 +203,16 @@ def extract_features(log_level, path):
 	if shutil.which("sourcekitten") is None:
 		fatal_error("SourceKitten not found. Please install from https://github.com/jpsim/SourceKitten.")
 	feature_extractor = FeatureExtractor()
-	feature_extractor.extract(path)
+
+	path_obj = Path(path)
+	if path_obj.is_file():
+		feature_extractor.extract(path)
+	elif path_obj.is_dir():
+		for file_obj in path_obj.glob("**/*.swift"):
+			file = file_obj.as_posix()
+			feature_extractor.extract(file)
+	else:
+		LOGGER.error("Wrong path {}", path)
 
 if __name__ == "__main__":
-	extract_features(log_level=Logger.LogLevel.VERBOSE, path="test_data/test.swift")
+	extract_features(log_level=Logger.LogLevel.MESSAGE, path="test_data/test.swift")
