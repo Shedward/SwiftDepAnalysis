@@ -4,6 +4,7 @@ import subprocess
 import argparse
 import shutil
 import json
+from itertools import takewhile
 from enum import Enum
 
 # -- Utilities --
@@ -120,6 +121,11 @@ class FeatureExtractor:
 			node["key.substructure"]
 		)
 
+	def _extract_longest_type_name(self, name):
+		name_parts = name.split(".")
+		type_parts = takewhile(lambda w: len(w) > 0 and w[0].isupper(), name_parts)
+		return ".".join(type_parts)
+
 	def _process_node(self, context, node):
 		kind = node.get("key.kind")
 		name = node.get("key.name")
@@ -133,11 +139,9 @@ class FeatureExtractor:
 			LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
 
 		def track_dependency(dependency, type, object=None):
-			if dependency is None:
-				return 
 			if object is None:
 				object = context.declaration
-			if dependency == object:
+			if dependency == object or object is None or dependency is None:
 				return
 			dependency = SwiftDependency(object, dependency, type, context.file)
 			self._dependencies.append(dependency)
@@ -146,11 +150,14 @@ class FeatureExtractor:
 		declared_type_name = None
 		if (kind == "source.lang.swift.decl.struct"):
 			track_type("struct")
+			track_dependency(context.resolve_fullname(name), "nested")
 			declared_type_name = name
 		elif (kind == "source.lang.swift.decl.class"):
 			track_type("class")
+			track_dependency(context.resolve_fullname(name), "nested")
 			declared_type_name = name
 		elif (kind == "source.lang.swift.decl.enum"):
+			track_dependency(context.resolve_fullname(name), "nested")
 			track_type("enum")
 			declared_type_name = name
 		elif (kind == "source.lang.swift.decl.protocol"):
@@ -162,6 +169,13 @@ class FeatureExtractor:
 			track_dependency(typename, "property")
 		elif (kind == "source.lang.swift.decl.var.static"):
 			track_dependency(typename, "static_property")
+		elif (kind == "source.lang.swift.expr.call"):
+			called_type = self._extract_longest_type_name(name)
+			if len(called_type) > 0:
+				if called_type == name:
+					track_dependency(called_type, "called")
+				else:
+					track_dependency(called_type, "called_static")
 
 		if "key.inheritedtypes" in node:
 			inheritedtypes = node["key.inheritedtypes"]
