@@ -52,12 +52,27 @@ class SwiftObject:
         self.kind = kind
         self.path = path
 
+    def to_dict():
+        return {
+            "name": self.name,
+            "kind": self.kind,
+            "path": self.path
+        }
+
 class SwiftDependency:
     def __init__(self, object, dependency, type, path):
         self.object = object 
         self.dependency = dependency
         self.type = type
         self.path = path
+
+    def to_dict():
+        return {
+            "object": self.object,
+            "dependency": self.dependency,
+            "type": self.type,
+            "path": self.path
+        } 
 
 class ProcessingContext:
     def __init__(self, file, level, declaration):
@@ -202,11 +217,7 @@ class FeatureExtractor:
 
             writer.writeheader()
             for defenition in self.index():
-                writer.writerow({
-                    "name": defenition.name,
-                    "kind": defenition.kind,
-                    "path": defenition.path
-                })
+                writer.writerow(defenition.to_dict())
 
         with open(prefix + ".deps.csv", mode="w") as csv_file:
             fieldnames = ["object", "dependency", "type", "path"]
@@ -214,12 +225,7 @@ class FeatureExtractor:
 
             writer.writeheader()
             for dep in self.dependencies():
-                writer.writerow({
-                    "object": dep.object,
-                    "dependency": dep.dependency,
-                    "type": dep.type,
-                    "path": dep.path
-                })
+                writer.writerow(dep.to_dict())
 
 # -- Main --
 
