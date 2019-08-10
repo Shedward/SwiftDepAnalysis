@@ -5,6 +5,7 @@ import argparse
 import shutil
 import json
 import csv
+import re
 from itertools import takewhile
 from enum import Enum
 from pathlib import Path
@@ -38,7 +39,7 @@ class Logger:
         if (self.log_level.value >= Logger.LogLevel.DEBUG.value):
             print(msg.format(*args, **kwargs))
 
-LOGGER = Logger(Logger.LogLevel.NONE)
+LOGGER = Logger(Logger.LogLevel.MESSAGE)
 
 def fatal_error(msg=None):
     LOGGER.error("Fatal error {}", msg)
@@ -52,12 +53,27 @@ class SwiftObject:
         self.kind = kind
         self.path = path
 
-    def to_dict():
+    def to_dict(self):
         return {
             "name": self.name,
             "kind": self.kind,
             "path": self.path
         }
+
+    @staticmethod
+    def from_dict(dict):
+        return SwiftObject(dict["name"], dict["kind"], dict["path"])
+
+    def __eq__(self, other):
+        return (self.name == other.name 
+            and self.kind == other.kind 
+            and self.path == other.path)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.name, self.kind, self.path, type(self)))
 
 class SwiftDependency:
     def __init__(self, object, dependency, type, path):
@@ -66,13 +82,29 @@ class SwiftDependency:
         self.type = type
         self.path = path
 
-    def to_dict():
+    def to_dict(self):
         return {
             "object": self.object,
             "dependency": self.dependency,
             "type": self.type,
             "path": self.path
-        } 
+        }
+
+    @staticmethod
+    def from_dict(dict):
+        return SwiftDependency(dict["object"], dict["dependency"], dict["type"], dict["path"])
+
+    def __eq__(self, other):
+        return (self.object == other.object 
+            and self.dependency == other.dependency 
+            and self.type == other.type 
+            and self.path == other.path)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.object, self.dependency, self.type, self.path, type(self)))
 
 class ProcessingContext:
     def __init__(self, file, level, declaration):
@@ -88,8 +120,8 @@ class ProcessingContext:
 
 class FeatureExtractor:
     def __init__(self):
-        self._index = []
-        self._dependencies = []
+        self._index = set()
+        self._dependencies = set()
 
     def extract(self, filename):
         self.declarations_count = 0
@@ -156,7 +188,7 @@ class FeatureExtractor:
 
         def track_type(type):
             swift_object = SwiftObject(context.resolve_fullname(name), type, context.file)
-            self._index.append(swift_object)
+            self._index.add(swift_object)
             LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
             self.declarations_count += 1
 
@@ -166,7 +198,7 @@ class FeatureExtractor:
             if dependency == object or object is None or dependency is None:
                 return
             dependency = SwiftDependency(object, dependency, type, context.file)
-            self._dependencies.append(dependency)
+            self._dependencies.add(dependency)
             LOGGER.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
             self.dependencies_count += 1
 
@@ -210,14 +242,42 @@ class FeatureExtractor:
 
         self._process_substructure(context, node, declared_type_name)
 
+    def clean_up_dependencies(self, keep_only_index_deps=True):
+        clean_up_dependencies = set()
+        for dependency in self._dependencies:
+            subdependencies = list(self._split_types(dependency.dependency))
+            for subdependency in subdependencies:
+                new_dependency = SwiftDependency(dependency.object, subdependency, dependency.type, dependency.path)
+                clean_up_dependencies.add(new_dependency)
+
+        if keep_only_index_deps:
+            indexed_objects = list(map(lambda d: d.name, self._index))
+            print(indexed_objects)
+            def dependency_is_in_index(dependency):
+                return (dependency.object in indexed_objects 
+                    and dependency.dependency in indexed_objects)
+
+            clean_up_dependencies = list(filter(dependency_is_in_index, clean_up_dependencies))
+
+        self._dependencies = clean_up_dependencies
+
+    def _split_types(self, text):
+        def is_class_name(string):
+            if len(string) == 0:
+                return False
+            else:
+                return string[0].isupper()
+
+        return filter(is_class_name, re.compile("[^\w_\.]").split(text)) 
+
     def export_csv_to(self, prefix):
         with open(prefix + ".index.csv", mode="w") as csv_file:
             fieldnames = ["name", "kind", "path"]
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
             writer.writeheader()
-            for defenition in self.index():
-                writer.writerow(defenition.to_dict())
+            for definition in self.index():
+                writer.writerow(definition.to_dict())
 
         with open(prefix + ".deps.csv", mode="w") as csv_file:
             fieldnames = ["object", "dependency", "type", "path"]
@@ -227,11 +287,26 @@ class FeatureExtractor:
             for dep in self.dependencies():
                 writer.writerow(dep.to_dict())
 
+    def import_csv_from(self, prefix):
+        new_index = set()
+        with open(prefix + ".index.csv", mode="r") as csv_file:
+            fieldnames = ["name", "kind", "path"]
+            reader = csv.DictReader(csv_file, fieldnames=fieldnames)
+            for definition in reader:
+                new_index.add(SwiftObject.from_dict(definition))
+        self._index = new_index
+
+        new_dependencies = set()
+        with open(prefix + ".deps.csv", mode="r") as csv_file:
+            fieldnames = ["object", "dependency", "type", "path"]
+            reader = csv.DictReader(csv_file, fieldnames=fieldnames)
+            for dependency in reader:
+                new_dependencies.add(SwiftDependency.from_dict(dependency))
+        self._dependencies = new_dependencies
+
 # -- Main --
 
-def extract_features(log_level, path, destination):
-    global LOGGER
-    LOGGER = Logger(log_level)
+def extract_features(path, destination):
     if shutil.which("sourcekitten") is None:
         fatal_error("SourceKitten not found. Please install from https://github.com/jpsim/SourceKitten.")
     feature_extractor = FeatureExtractor()
@@ -249,5 +324,14 @@ def extract_features(log_level, path, destination):
     LOGGER.message("Extracted {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
     feature_extractor.export_csv_to(destination)
 
+def cleanup_features(path, destination):
+    feature_extractor = FeatureExtractor()
+    feature_extractor.import_csv_from(path)
+    LOGGER.message("Imported {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
+    feature_extractor.clean_up_dependencies()
+    LOGGER.message("Clened up to {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
+    feature_extractor.export_csv_to(destination)
+
 if __name__ == "__main__":
-    extract_features(log_level=Logger.LogLevel.MESSAGE, path="/Users/shed/Projects/arameem/ToYou", destination="/Users/shed/Desktop/ToYou")
+    # extract_features(log_level=Logger.LogLevel.MESSAGE, path="/Users/shed/Projects/arameem/ToYou", destination="/Users/shed/Desktop/ToYou")
+    cleanup_features("/Users/shed/Desktop/ToYou", "/Users/shed/Desktop/ToYou.cleanup")
