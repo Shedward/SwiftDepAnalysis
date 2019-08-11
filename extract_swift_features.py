@@ -48,32 +48,35 @@ def fatal_error(msg=None):
 # -- Feature extracting
 
 class SwiftObject:
-    def __init__(self, name, kind, path):
+    def __init__(self, name, kind, path, size):
         self.name = name
         self.kind = kind
         self.path = path
+        self.size = size
 
     def to_dict(self):
         return {
             "name": self.name,
             "kind": self.kind,
-            "path": self.path
+            "path": self.path,
+            "size": self.size
         }
 
     @staticmethod
     def from_dict(dict):
-        return SwiftObject(dict["name"], dict["kind"], dict["path"])
+        return SwiftObject(dict["name"], dict["kind"], dict["path"], dict["size"])
 
     def __eq__(self, other):
         return (self.name == other.name 
             and self.kind == other.kind 
-            and self.path == other.path)
+            and self.path == other.path
+            and self.size == other.size)
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash((self.name, self.kind, self.path, type(self)))
+        return hash((self.name, self.kind, self.path, self.size, type(self)))
 
 class SwiftDependency:
     def __init__(self, object, dependency, type, path):
@@ -187,7 +190,10 @@ class FeatureExtractor:
         LOGGER.debug("Process node {} {}", name, kind)
 
         def track_type(type):
-            swift_object = SwiftObject(context.resolve_fullname(name), type, context.file)
+            bodylength = node.get("key.bodylength")
+            if bodylength is None:
+                bodylength = 0
+            swift_object = SwiftObject(context.resolve_fullname(name), type, context.file, bodylength)
             self._index.add(swift_object)
             LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
             self.declarations_count += 1
@@ -242,7 +248,7 @@ class FeatureExtractor:
 
         self._process_substructure(context, node, declared_type_name)
 
-    def clean_up_dependencies(self, keep_only_index_deps=True):
+    def clean_up_dependencies(self, keep_only_index_deps=True, remove_self_deps=True):
         clean_up_dependencies = set()
         for dependency in self._dependencies:
             subdependencies = list(self._split_types(dependency.dependency))
@@ -252,12 +258,14 @@ class FeatureExtractor:
 
         if keep_only_index_deps:
             indexed_objects = list(map(lambda d: d.name, self._index))
-            print(indexed_objects)
             def dependency_is_in_index(dependency):
                 return (dependency.object in indexed_objects 
                     and dependency.dependency in indexed_objects)
 
             clean_up_dependencies = list(filter(dependency_is_in_index, clean_up_dependencies))
+
+        if remove_self_deps:
+            clean_up_dependencies = list(filter(lambda d: d.object != d.dependency, clean_up_dependencies))
 
         self._dependencies = clean_up_dependencies
 
@@ -272,7 +280,7 @@ class FeatureExtractor:
 
     def export_csv_to(self, prefix):
         with open(prefix + ".index.csv", mode="w") as csv_file:
-            fieldnames = ["name", "kind", "path"]
+            fieldnames = ["name", "kind", "path", "size"]
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
             writer.writeheader()
@@ -290,7 +298,7 @@ class FeatureExtractor:
     def import_csv_from(self, prefix):
         new_index = set()
         with open(prefix + ".index.csv", mode="r") as csv_file:
-            fieldnames = ["name", "kind", "path"]
+            fieldnames = ["name", "kind", "path", "size"]
             reader = csv.DictReader(csv_file, fieldnames=fieldnames)
             for definition in reader:
                 new_index.add(SwiftObject.from_dict(definition))
@@ -321,17 +329,10 @@ def extract_features(path, destination):
     else:
         LOGGER.error("Wrong path {}", path)
 
-    LOGGER.message("Extracted {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
-    feature_extractor.export_csv_to(destination)
-
-def cleanup_features(path, destination):
-    feature_extractor = FeatureExtractor()
-    feature_extractor.import_csv_from(path)
-    LOGGER.message("Imported {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
+    LOGGER.message("Extracted {} definitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
     feature_extractor.clean_up_dependencies()
-    LOGGER.message("Clened up to {} defenitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
+    LOGGER.message("Clened up to {} definitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
     feature_extractor.export_csv_to(destination)
 
 if __name__ == "__main__":
-    # extract_features(log_level=Logger.LogLevel.MESSAGE, path="/Users/shed/Projects/arameem/ToYou", destination="/Users/shed/Desktop/ToYou")
-    cleanup_features("/Users/shed/Desktop/ToYou", "/Users/shed/Desktop/ToYou.cleanup")
+    extract_features(path="/Users/shed/Projects/arameem/ToYou", destination="/Users/shed/Desktop/ToYou")
