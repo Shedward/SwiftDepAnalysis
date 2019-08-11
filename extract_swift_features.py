@@ -6,6 +6,7 @@ import shutil
 import json
 import csv
 import re
+from bisect import bisect
 from itertools import takewhile
 from enum import Enum
 from pathlib import Path
@@ -47,6 +48,7 @@ class SwiftObject:
         self.kind = kind
         self.path = path
         self.size = size
+        self.tags = []
 
     def to_dict(self):
         return {
@@ -104,16 +106,32 @@ class SwiftDependency:
         return hash((self.object, self.dependency, self.type, self.path, type(self)))
 
 class ProcessingContext:
-    def __init__(self, file, level, declaration):
+    def __init__(self, file, level, declaration, position_resolver):
         self.file = file
         self.level = level
         self.declaration = declaration
+        self.position_resolver = position_resolver
 
     def resolve_fullname(self, name):
         if self.declaration is None:
             return name
         else:
             return self.declaration + '.' + name
+
+    def resolve_file_with_position(self, abs_position):
+        position = self.position_resolver.position(abs_position)
+        return "{}:{}:{}".format(self.file, position[0], position[1])
+
+class PositionResolver:
+    def __init__(self, filename):
+        with open(filename, "r") as f:
+            read_data = f.read()
+            self.line_ends = [indx for indx, ch in enumerate(read_data) if ch == '\n' ]
+
+    def position(self, abs_position):
+        line = bisect(self.line_ends, abs_position) - 1
+        start_of_line = self.line_ends[line]
+        return (line + 2, abs_position - start_of_line)
 
 class SwiftDependenciesExtractor:
     def __init__(self):
@@ -129,7 +147,7 @@ class SwiftDependenciesExtractor:
         structure_string = structure_bytes.decode("utf8")
         structure_json = json.loads(structure_string)
         self._procees_structure(
-            ProcessingContext(filename, 0, None), 
+            ProcessingContext(filename, 0, None, PositionResolver(filename)), 
             structure_json
         )
         self.logger.message("{}: {} defs/{} deps", filename, self.declarations_count, self.dependencies_count)
@@ -167,7 +185,8 @@ class SwiftDependenciesExtractor:
             ProcessingContext(
                 context.file,
                 context.level + 1,
-                new_declaration
+                new_declaration,
+                context.position_resolver 
             ),
             node["key.substructure"]
         )
@@ -181,6 +200,8 @@ class SwiftDependenciesExtractor:
         kind = node.get("key.kind")
         name = node.get("key.name")
         typename = node.get("key.typename")
+        offset = node.get("key.offset")
+        position_in_file = context.resolve_file_with_position(offset)
 
         self.logger.debug("Process node {} {}", name, kind)
 
@@ -188,7 +209,7 @@ class SwiftDependenciesExtractor:
             bodylength = node.get("key.bodylength")
             if bodylength is None:
                 bodylength = 0
-            swift_object = SwiftObject(context.resolve_fullname(name), type, context.file, bodylength)
+            swift_object = SwiftObject(context.resolve_fullname(name), type, position_in_file, bodylength)
             self._index.add(swift_object)
             self.logger.verbose("Declared {} {}", swift_object.kind, swift_object.name)
             self.declarations_count += 1
@@ -198,7 +219,7 @@ class SwiftDependenciesExtractor:
                 object = context.declaration
             if dependency == object or object is None or dependency is None:
                 return
-            dependency = SwiftDependency(object, dependency, type, context.file)
+            dependency = SwiftDependency(object, dependency, type, position_in_file)
             self._dependencies.add(dependency)
             self.logger.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
             self.dependencies_count += 1
@@ -311,6 +332,54 @@ class SwiftDependenciesExtractor:
                 new_dependencies.add(SwiftDependency.from_dict(dependency))
         self._dependencies = new_dependencies
 
+# -- Linting --
+
+class SwiftDependenciesLinter:
+    class RuleType(Enum):
+        INFO = 0
+        WARNING = 1
+        ERROR = 2
+
+    class Rule:
+        def check(self, dependency):
+            return [RuleViolation(RuleType.ERROR, "Rule not implemented")]
+
+    class RuleViolation:
+        def __init__(self, type, message, position=None):
+            self.type = type
+            self.message = message
+            self.position
+
+    class LintResult:
+        def __init__(self, success_count, fails_count, violations):
+            self.success_count = success_count
+            self.fails_count = fails_count
+            self.violations = violations
+
+    def __init__(self, rules, logger):
+        self.rules = rules
+
+    def check(self, dependencies):
+        success_count = 0
+        fails_count = 0
+        violations = []
+        for dependency in dependencies:
+            dependency_violations = []
+            for rule in self.rules:
+                dependency_violations += rule.check(dependency)
+            if len(dependency_violations) > 0:
+                fails_count += 1
+            else:
+                success_count += 1
+            violations += dependency_violations
+
+        return LintResult(success_count, fails_count, violations)
+
+# -- Meta info --
+
+class SwiftObjectFeaturesExtractor:
+    def extract(self, object):
+        pass
 
 # -- Main --
 
