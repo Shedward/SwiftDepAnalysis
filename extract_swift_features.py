@@ -39,13 +39,7 @@ class Logger:
         if (self.log_level.value >= Logger.LogLevel.DEBUG.value):
             print(msg.format(*args, **kwargs))
 
-LOGGER = Logger(Logger.LogLevel.MESSAGE)
-
-def fatal_error(msg=None):
-    LOGGER.error("Fatal error {}", msg)
-    exit(1)
-
-# -- Feature extracting
+# -- Dependency extracting
 
 class SwiftObject:
     def __init__(self, name, kind, path, size):
@@ -121,15 +115,16 @@ class ProcessingContext:
         else:
             return self.declaration + '.' + name
 
-class FeatureExtractor:
+class SwiftDependenciesExtractor:
     def __init__(self):
         self._index = set()
         self._dependencies = set()
+        self.logger = Logger(Logger.LogLevel.NONE)
 
     def extract(self, filename):
         self.declarations_count = 0
         self.dependencies_count = 0
-        LOGGER.verbose("Started {}", filename)
+        self.logger.verbose("Started {}", filename)
         structure_bytes = self._structure(filename)
         structure_string = structure_bytes.decode("utf8")
         structure_json = json.loads(structure_string)
@@ -137,7 +132,7 @@ class FeatureExtractor:
             ProcessingContext(filename, 0, None), 
             structure_json
         )
-        LOGGER.message("{}: {} defs/{} deps", filename, self.declarations_count, self.dependencies_count)
+        self.logger.message("{}: {} defs/{} deps", filename, self.declarations_count, self.dependencies_count)
 
 
     def index(self):
@@ -187,7 +182,7 @@ class FeatureExtractor:
         name = node.get("key.name")
         typename = node.get("key.typename")
 
-        LOGGER.debug("Process node {} {}", name, kind)
+        self.logger.debug("Process node {} {}", name, kind)
 
         def track_type(type):
             bodylength = node.get("key.bodylength")
@@ -195,7 +190,7 @@ class FeatureExtractor:
                 bodylength = 0
             swift_object = SwiftObject(context.resolve_fullname(name), type, context.file, bodylength)
             self._index.add(swift_object)
-            LOGGER.verbose("Declared {} {}", swift_object.kind, swift_object.name)
+            self.logger.verbose("Declared {} {}", swift_object.kind, swift_object.name)
             self.declarations_count += 1
 
         def track_dependency(dependency, type, object=None):
@@ -205,7 +200,7 @@ class FeatureExtractor:
                 return
             dependency = SwiftDependency(object, dependency, type, context.file)
             self._dependencies.add(dependency)
-            LOGGER.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
+            self.logger.verbose("Dependency {} {} -> {}", dependency.type, dependency.object, dependency.dependency)
             self.dependencies_count += 1
 
         declared_type_name = None
@@ -248,26 +243,30 @@ class FeatureExtractor:
 
         self._process_substructure(context, node, declared_type_name)
 
-    def clean_up_dependencies(self, keep_only_index_deps=True, remove_self_deps=True):
+    def split_complex_dependencies_into_simple_types(self):
         clean_up_dependencies = set()
         for dependency in self._dependencies:
             subdependencies = list(self._split_types(dependency.dependency))
             for subdependency in subdependencies:
                 new_dependency = SwiftDependency(dependency.object, subdependency, dependency.type, dependency.path)
                 clean_up_dependencies.add(new_dependency)
-
-        if keep_only_index_deps:
-            indexed_objects = list(map(lambda d: d.name, self._index))
-            def dependency_is_in_index(dependency):
-                return (dependency.object in indexed_objects 
-                    and dependency.dependency in indexed_objects)
-
-            clean_up_dependencies = list(filter(dependency_is_in_index, clean_up_dependencies))
-
-        if remove_self_deps:
-            clean_up_dependencies = list(filter(lambda d: d.object != d.dependency, clean_up_dependencies))
-
         self._dependencies = clean_up_dependencies
+
+    def remove_dependencies_outside_index(self):
+        clean_up_dependencies = self._dependencies
+        indexed_objects = list(map(lambda d: d.name, self._index))
+        def dependency_is_in_index(dependency):
+            return (dependency.object in indexed_objects 
+                and dependency.dependency in indexed_objects)
+
+        clean_up_dependencies = list(filter(dependency_is_in_index, clean_up_dependencies))
+        self._dependencies = clean_up_dependencies
+
+    def remove_self_dependencies(self):
+        clean_up_dependencies = self._dependencies
+        clean_up_dependencies = list(filter(lambda d: d.object != d.dependency, clean_up_dependencies))
+        self._dependencies = clean_up_dependencies
+
 
     def _split_types(self, text):
         def is_class_name(string):
@@ -312,27 +311,63 @@ class FeatureExtractor:
                 new_dependencies.add(SwiftDependency.from_dict(dependency))
         self._dependencies = new_dependencies
 
+
 # -- Main --
 
-def extract_features(path, destination):
+def extract_features(log_level, path, destination):
+    logger = Logger(log_level)
     if shutil.which("sourcekitten") is None:
-        fatal_error("SourceKitten not found. Please install from https://github.com/jpsim/SourceKitten.")
-    feature_extractor = FeatureExtractor()
+        logger.error("SourceKitten not found. Please install from https://github.com/jpsim/SourceKitten.")
+        exit(1)
+    dependencies_extractor = SwiftDependenciesExtractor()
+    dependencies_extractor.logger = logger
 
     path_obj = Path(path)
     if path_obj.is_file():
-        feature_extractor.extract(path)
+        dependencies_extractor.extract(path)
     elif path_obj.is_dir():
         for file_obj in path_obj.glob("**/*.swift"):
             file = file_obj.as_posix()
-            feature_extractor.extract(file)
+            dependencies_extractor.extract(file)
     else:
-        LOGGER.error("Wrong path {}", path)
+        logger.error("Wrong path {}", path)
 
-    LOGGER.message("Extracted {} definitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
-    feature_extractor.clean_up_dependencies()
-    LOGGER.message("Clened up to {} definitions and {} dependencies", len(feature_extractor.index()), len(feature_extractor.dependencies()))
-    feature_extractor.export_csv_to(destination)
+    def dependency_statistic():
+        return (len(dependencies_extractor.index()), len(dependencies_extractor.dependencies()))
+
+    def stat_diff(old_statistic, new_statistic):
+        def difference(statistic_values):
+            return statistic_values[0] - statistic_values[1]
+
+        return list(map(difference, zip(old_statistic, new_statistic)))
+
+    def stat_description(dependency_statistic):
+        return "{} defs/{} deps".format(*dependency_statistic)
+
+    current_stat = dependency_statistic()
+    logger.message("Extracted: {}", stat_description(current_stat))
+
+    dependencies_extractor.split_complex_dependencies_into_simple_types()
+    diff = stat_diff(current_stat, dependency_statistic())
+    logger.message("Removed after splitting complex dependencies: {}", stat_description(diff))
+    current_stat = dependency_statistic()
+
+    dependencies_extractor.remove_dependencies_outside_index()
+    diff = stat_diff(current_stat, dependency_statistic())
+    logger.message("Removed dependencies outside index: {}", stat_description(diff))
+    current_stat = dependency_statistic()
+
+    dependencies_extractor.remove_self_dependencies()
+    diff = stat_diff(current_stat, dependency_statistic())
+    logger.message("Removed self dependencies: {}", stat_description(diff))
+    current_stat = dependency_statistic()
+
+    logger.message("Cleaned up: {}", stat_description(dependency_statistic()))
+    dependencies_extractor.export_csv_to(destination)
 
 if __name__ == "__main__":
-    extract_features(path="/Users/shed/Projects/arameem/ToYou", destination="/Users/shed/Desktop/ToYou")
+    extract_features(
+        log_level=Logger.LogLevel.MESSAGE, 
+        path="/Users/shed/Projects/arameem/ToYou", 
+        destination="/Users/shed/Desktop/ToYou"
+    )
