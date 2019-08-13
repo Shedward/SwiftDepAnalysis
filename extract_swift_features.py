@@ -40,7 +40,7 @@ class Logger:
         if (self.log_level.value >= Logger.LogLevel.DEBUG.value):
             print(msg.format(*args, **kwargs))
 
-# -- Dependency extracting
+# -- Dependency extracting --
 
 class SwiftObject:
     def __init__(self, name, kind, path, size):
@@ -48,7 +48,6 @@ class SwiftObject:
         self.kind = kind
         self.path = path
         self.size = size
-        self.tags = []
 
     def to_dict(self):
         return {
@@ -59,7 +58,7 @@ class SwiftObject:
         }
 
     @staticmethod
-    def from_dict(dict):
+    def from_dict(dict):  
         return SwiftObject(dict["name"], dict["kind"], dict["path"], dict["size"])
 
     def __eq__(self, other):
@@ -359,7 +358,7 @@ class SwiftDependenciesLinter:
     def __init__(self, rules, logger):
         self.rules = rules
 
-    def check(self, dependencies):
+    def check(self, index, dependencies):
         success_count = 0
         fails_count = 0
         violations = []
@@ -375,11 +374,21 @@ class SwiftDependenciesLinter:
 
         return LintResult(success_count, fails_count, violations)
 
-# -- Meta info --
+# -- Tagging --
 
-class SwiftObjectFeaturesExtractor:
+class SwiftObjectTagsExtractor:
+    class TagExtractor:
+        def extract(self, object):
+            return []
+
+    def __init__(self, rules):
+        self.rules = rules
+
     def extract(self, object):
-        pass
+        tags = set()
+        for rule in self.rules:
+            tags += rule.extract(object)
+        return list(tags)
 
 # -- Main --
 
