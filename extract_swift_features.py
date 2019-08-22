@@ -287,6 +287,10 @@ class SwiftDependenciesExtractor:
         clean_up_dependencies = list(filter(lambda d: d.object != d.dependency, clean_up_dependencies))
         self._dependencies = clean_up_dependencies
 
+    def mark_up_tags(self, tag_extractor):
+        for object in self.index():
+            tags = tag_extractor.extract(object)
+            object.tags += tags
 
     def _split_types(self, text):
         def is_class_name(string):
@@ -392,7 +396,7 @@ class SwiftObjectTagsExtractor:
 
 # -- Main --
 
-def extract_features(log_level, path, destination):
+def extract_features(log_level, path, destination, extractors=[]):
     logger = Logger(log_level)
     if shutil.which("sourcekitten") is None:
         logger.error("SourceKitten not found. Please install from https://github.com/jpsim/SourceKitten.")
@@ -439,6 +443,9 @@ def extract_features(log_level, path, destination):
     diff = stat_diff(current_stat, dependency_statistic())
     logger.message("Removed self dependencies: {}", stat_description(diff))
     current_stat = dependency_statistic()
+
+    tags_extractor = SwiftDependenciesExtractor(extractors)
+    dependencies_extractor.mark_up_tags()
 
     logger.message("Cleaned up: {}", stat_description(dependency_statistic()))
     dependencies_extractor.export_csv_to(destination)
